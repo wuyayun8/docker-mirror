@@ -1,0 +1,33 @@
+name: Pull and Push sygi/whisper-cpp
+
+on:
+  workflow_dispatch: # 允许手动触发
+  schedule:
+    - cron: '0 2 * * *' # 每天凌晨 2 点自动同步（可选）
+
+jobs:
+  pull-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull sygi/whisper-cpp:cpu-small
+        run: |
+          docker pull sygi/whisper-cpp:cpu-small
+
+      - name: Tag for GHCR
+        run: |
+          docker tag sygi/whisper-cpp:cpu-small ghcr.io/wuyayun8/whisper-cpp:cpu-small
+
+      - name: Push to GHCR
+        run: |
+          docker push ghcr.io/wuyayun8/whisper-cpp:cpu-small
+
+      - name: Success Notification
+        run: |
+          echo "✅ Image pushed to ghcr.io/wuyayun8/whisper-cpp:cpu-small"
